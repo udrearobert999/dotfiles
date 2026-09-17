@@ -16,6 +16,9 @@ Personal tmux and Neovim configuration.
     - `telescope.nvim` for fuzzy finding, git grep, and LSP pickers
     - `vim-fugitive` / `gitsigns.nvim` for git
     - `glow.nvim` for Markdown preview
+  - `lua/robert/util/` — small shared modules used across plugin files
+    (e.g. `nav.lua` for window-navigation keymaps, `clipboard.lua` for
+    copy-to-clipboard-with-echo)
 
 ## Usage
 
