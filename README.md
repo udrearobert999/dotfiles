@@ -36,6 +36,10 @@ Personal tmux and Neovim configuration.
 - A [Nerd Font](https://www.nerdfonts.com/) in your terminal (config sets
   `vim.g.have_nerd_font = true`)
 - `make` — optional, builds `telescope-fzf-native` for faster sorting
+- A clipboard provider for `vim.o.clipboard = 'unnamedplus'` to actually
+  work (`:help provider-clipboard`) — macOS ships `pbcopy`/`pbpaste`
+  built in, so nothing to install there; on Linux you need `xclip` or
+  `xsel` (X11) or `wl-clipboard` (Wayland)
 
 ### Contents
 
@@ -57,10 +61,25 @@ Personal tmux and Neovim configuration.
 
 Setting this up on a new machine:
 
-1. Install the prerequisites listed above (e.g. via Homebrew on macOS):
+1. Install the prerequisites listed above.
+
+   macOS (via [Homebrew](https://brew.sh/)):
 
    ```sh
    brew install tmux neovim git ripgrep node glow
+   ```
+
+   Linux (Debian/Ubuntu; swap `apt` for your distro's package manager,
+   e.g. `dnf`/`pacman`) — also picks a clipboard provider depending on
+   your display server:
+
+   ```sh
+   sudo apt install tmux neovim git ripgrep nodejs make gcc
+   sudo apt install xclip        # X11
+   sudo apt install wl-clipboard # Wayland
+
+   # glow isn't in most distro repos; install from a release binary:
+   # https://github.com/charmbracelet/glow/releases
    ```
 
 2. Clone this repo and symlink the configs into place:
