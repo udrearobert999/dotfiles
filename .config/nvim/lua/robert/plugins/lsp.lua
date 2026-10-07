@@ -104,6 +104,7 @@ return {
           },
         },
         ts_ls = {},
+        yamlls = {},
         eslint = {
           settings = {
             workingDirectories = { mode = 'auto' },
@@ -127,6 +128,7 @@ return {
         'rust-analyzer',
         'typescript-language-server',
         'eslint-lsp',
+        'yaml-language-server',
         'starpls',
         'buildifier',
         'prettierd',
