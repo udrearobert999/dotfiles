@@ -11,7 +11,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- Split plugin specs by file (each returns a table)
   require 'robert.plugins.ui',
-  require 'robert.plugins.telescope',
+  require 'robert.plugins.fzf',
   require 'robert.plugins.lsp',
   require 'robert.plugins.completion',
   require 'robert.plugins.treesitter',
@@ -21,6 +21,7 @@ require('lazy').setup({
   require 'robert.plugins.oil',
   require 'robert.plugins.smart-splits',
   require 'robert.plugins.rooter',
+  require 'robert.plugins.bazel',
   require 'robert.plugins.glow',
 }, {
   ui = {

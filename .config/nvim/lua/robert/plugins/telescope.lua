@@ -1,13 +1,14 @@
 -- lua/robert/plugins/telescope.lua
 
--- Telescope closes its picker on BufLeave of the prompt buffer (hardcoded in
--- pickers.lua, no config toggle). Clear that specific autocmd group before
--- navigating away so the picker stays open, unfocused, until returned to.
-local function keep_open_on_leave(move)
-  return function(prompt_bufnr)
-    pcall(vim.api.nvim_clear_autocmds, { group = 'PickerInsert', buffer = prompt_bufnr })
-    move()
+-- Telescope's prompt is in insert mode and binds <C-k>/<C-l> itself, so the
+-- global (normal-mode) smart-splits maps need re-binding here. Leaving the
+-- prompt closes the picker; reopen with <leader>sr (resume).
+local function nav_mappings()
+  local nav = {}
+  for lhs, move in pairs(require 'robert.util.nav') do
+    nav[lhs] = function() move() end
   end
+  return nav
 end
 
 return {
@@ -28,20 +29,26 @@ return {
     opts = function()
       local themes = require 'telescope.themes'
       local actions = require 'telescope.actions'
-      local nav = {}
-      for lhs, move in pairs(require 'robert.util.nav') do
-        nav[lhs] = keep_open_on_leave(move)
-      end
+      local toggle_preview = require('telescope.actions.layout').toggle_preview
+      local nav = nav_mappings()
 
       return {
         defaults = {
-          path_display = { 'shorten' },
+          path_display = { 'filename_first' },
           mappings = {
             i = vim.tbl_extend('force', nav, {
               ['<C-e>'] = actions.preview_scrolling_right,
+              ['<M-p>'] = toggle_preview,
             }),
-            n = nav,
+            n = vim.tbl_extend('force', nav, {
+              ['<C-e>'] = actions.preview_scrolling_right,
+              ['<M-p>'] = toggle_preview,
+            }),
           },
+        },
+        pickers = {
+          -- Each query runs rg over the whole repo; wait for a typing pause.
+          live_grep = { debounce = 150 },
         },
         extensions = {
           ['ui-select'] = themes.get_dropdown(),
@@ -112,6 +119,14 @@ return {
     },
 
     init = function()
+      -- A re-shown preview window (<M-p>) gets default 'wrap', which turns
+      -- horizontal preview scrolling into a no-op.
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'TelescopePreviewerLoaded',
+        group = vim.api.nvim_create_augroup('robert-telescope-preview', { clear = true }),
+        callback = function() vim.wo.wrap = false end,
+      })
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('robert-telescope-lsp-attach', { clear = true }),
         callback = function(event)
