@@ -19,7 +19,7 @@ return {
     'ellisonleao/gruvbox.nvim',
     priority = 1000,
     config = function()
-      require('gruvbox').setup {}
+      require('gruvbox').setup { contrast = 'hard' }
       vim.o.background = 'light'
       vim.cmd.colorscheme 'gruvbox'
       vim.o.winborder = 'rounded'
@@ -42,6 +42,22 @@ return {
         icons_enabled = vim.g.have_nerd_font,
         section_separators = { left = '', right = '' },
         component_separators = '',
+      },
+      sections = {
+        lualine_c = {
+          {
+            'filename',
+            path = 1, -- relative to cwd
+            -- Plugin buffers (fugitive://, diffview://, ...) have URI names; show
+            -- them as "scheme: <relative path>" with long hashes shortened.
+            fmt = function(name)
+              local scheme, rest = vim.api.nvim_buf_get_name(0):match '^(%w+)://(.*)$'
+              if not scheme then return name end
+              rest = vim.fn.fnamemodify(rest, ':~:.'):gsub('%.git//', ''):gsub('(%x%x%x%x%x%x%x%x%x%x)%x+', '%1')
+              return ('%s: %s%s'):format(scheme, rest, vim.bo.modifiable and '' or ' [-]')
+            end,
+          },
+        },
       },
       extensions = {
         {
