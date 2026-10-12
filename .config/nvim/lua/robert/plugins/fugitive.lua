@@ -29,6 +29,41 @@ return {
     local robert_fugitive_group = vim.api.nvim_create_augroup('robert-fugitive-group', {})
 
     local autocmd = vim.api.nvim_create_autocmd
+
+    -- In the blame window, `d` shows a side-by-side diff of the blamed file
+    -- before/after the commit under the cursor.
+    autocmd('FileType', {
+      group = robert_fugitive_group,
+      pattern = 'fugitiveblame',
+      callback = function(event)
+        vim.keymap.set('n', 'd', function()
+          local sha = vim.api.nvim_get_current_line():match '^%^?(%x+)'
+          if not sha or sha:match '^0+$' then return vim.notify('Line not committed yet', vim.log.levels.WARN) end
+
+          local blame_win = vim.api.nvim_get_current_win()
+          local source_win
+          for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            if win ~= blame_win and vim.wo[win].scrollbind then source_win = win end
+          end
+          if not source_win then return end
+
+          local file = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(source_win))
+          local root = vim.fn.FugitiveWorkTree()
+          local path = vim.fs.relpath(root, file)
+          if not path then return end
+
+          vim.api.nvim_win_close(blame_win, false)
+          vim.api.nvim_set_current_win(source_win)
+          vim.cmd.Gedit(sha .. ':' .. path)
+          if vim.system({ 'git', '-C', root, 'cat-file', '-e', sha .. '^:' .. path }):wait().code == 0 then
+            vim.cmd.Gvdiffsplit { sha .. '^', mods = { split = 'aboveleft' } }
+          else
+            vim.notify(path .. ' was added in ' .. sha:sub(1, 10), vim.log.levels.INFO)
+          end
+        end, { buffer = event.buf, nowait = true, desc = 'Diff file before/after this commit' })
+      end,
+    })
+
     autocmd('BufWinEnter', {
       group = robert_fugitive_group,
       pattern = '*',
