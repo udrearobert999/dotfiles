@@ -82,7 +82,7 @@ return {
       -- Enable the following language servers
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         basedpyright = {
           handlers = {
             ['textDocument/publishDiagnostics'] = function() end,
@@ -129,6 +129,7 @@ return {
         'typescript-language-server',
         'eslint-lsp',
         'yaml-language-server',
+        'gopls',
         'starpls',
         'buildifier',
         'prettierd',
